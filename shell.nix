@@ -11,6 +11,7 @@
   )
 , mkGoEnv ? pkgs.mkGoEnv
 , gomod2nix ? pkgs.gomod2nix
+, goreleaser ? pkgs.goreleaser
 }:
 
 let
@@ -20,6 +21,6 @@ pkgs.mkShell {
   packages = [
     goEnv
     gomod2nix
-    pkgs.antlr4
+    goreleaser
   ];
 }
