@@ -14,6 +14,22 @@ TARGET tgt3_4 192.0.2.1 shortname=tgt3
 # configure default options for measurements
 DEFAULT-PPS 10
 
+# configure prometheus histogram (needs be fixed across time)
+# these options are not used in VictoriaMetrics histogram mode
+# (as it allows dynamic histograms)
+#
+# The histogram is defined in two regions:
+# linear region from min_latency to max_linear_latency with N points per ms
+# logarithmic region from max_linear_latency to max_latency with M points
+#
+# Anything below min_latency falls into the min_latency bin
+# Anything above max_latency falls into the +Inf bin
+DEFAULT-HIST min-latency 1 # ms
+DEFAULT-HIST max-linear_latency 50 # ms
+DEFAULT-HIST linear-points_per_ms 4
+DEFAULT-HIST max-latency 1000 # ms
+DEFAULT-HIST log-points 20
+
 # define measurements between target1 and target2
 # target1 is sender
 # target2 is receiver
@@ -22,7 +38,12 @@ DEFAULT-PPS 10
 # - pps=<packets per second>
 #   Number of packets to send per second
 # - bucketwidth=<histogram width in seconds>
-#   Size of each histogram bin in seconds
+#   Size of each histogram bin in seconds to use in the backend (has no influence on resulting
+#   prometheus or VictoriaMetrics histogram)
+# - hist-min-latency=<minimum latency bin in milliseconds>
+#   Minimum latency bin for prometheus histogram
+# - hist-max-linear-latency=<maximum linear latency bin in milliseconds>
+#   Maximum latency bin in the linear region for prometheus histogram
 MEASUREMENT tgt1 tgt2
 MEASUREMENT tgt2 tgt1 pps=5 bucketwidth=0.0001
 

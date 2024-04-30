@@ -32,6 +32,7 @@ type MeasurementCfg struct {
 	duration    uint64
 	tags        []string
 	bucketWidth string
+	promHistBins []float64
 }
 
 func ParseConfig(r *bufio.Reader) (Config, error) {
@@ -50,6 +51,13 @@ func ParseConfig(r *bufio.Reader) (Config, error) {
 	var defaultPPS uint64 = 10
 	var defaultDuration uint64 = 60          // s
 	var defaultBucketWidth string = "0.0001" // s
+
+	// default settings for prometheus histogram
+	var defaultHistMinLatency uint64 = 1 // ms
+	var defaultHistMaxLatency uint64 = 1000 // ms
+	var defaultHistMaxLinearLatency uint64 = 50 // ms
+	var defaultHistLinearPtsPerMs uint64 = 4
+	var defaultHistLogPts uint64 = 5
 
 	for s.Scan() {
 		line := strings.TrimSpace(s.Text())
@@ -105,6 +113,13 @@ func ParseConfig(r *bufio.Reader) (Config, error) {
 				afi = "ip4"
 			}
 
+			// copy the default settings for the prometheus histogram
+			histMinLatency := defaultHistMinLatency // ms
+			histMaxLatency := defaultHistMaxLatency // ms
+			histMaxLinearLatency := defaultHistMaxLinearLatency // ms
+			histLinearPtsPerMs := defaultHistLinearPtsPerMs
+			histLogPts := defaultHistLogPts
+
 			measurement := MeasurementCfg{
 				targetSrc:   parts[1],
 				targetDst:   parts[2],
@@ -130,6 +145,7 @@ func ParseConfig(r *bufio.Reader) (Config, error) {
 				}
 
 			}
+			measurement.promHistBins = MakePromHistBins(histMinLatency, histMaxLatency, histMaxLinearLatency, histLinearPtsPerMs, histLogPts)
 			ret.measurements = append(ret.measurements, measurement)
 		}
 

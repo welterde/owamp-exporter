@@ -43,7 +43,8 @@ func (r *Registry) DumpMetrics(w io.Writer) error {
 	defer bw.Flush()
 
 	for mIdx, report := range r.reports {
-		tags := strings.Join(r.cfg.measurements[mIdx].tags, ",")
+		mcfg := r.cfg.measurements[mIdx]
+		tags := strings.Join(mcfg.tags, ",")
 		ts := uint64(report.metricsTimestamp * 1000.0)
 		rs := report.summary
 
@@ -92,22 +93,22 @@ func (r *Registry) DumpMetrics(w io.Writer) error {
 				return err
 			}
 		} else {
-			err = WriteHistogramPrometheus(bw, "owamp_latency", tags, ts, rs.latencyHist, rs.latencyHistWidth)
+			err = WriteHistogramPrometheus(bw, "owamp_latency", tags, ts, rs.latencyHist, rs.latencyHistWidth, mcfg.promHistBins)
 			if err != nil {
 				return err
 			}
 
-			// write TTL histogram
-			err = WriteHistogramPrometheus(bw, "owamp_ttl", tags, ts, rs.ttlHist, 1.0)
-			if err != nil {
-				return err
-			}
+			// TODO: write TTL histogram
+			// err = WriteHistogramPrometheus(bw, "owamp_ttl", tags, ts, rs.ttlHist, 1.0)
+			// if err != nil {
+			// 	return err
+			// }
 
-			// write reordering histogram
-			err = WriteHistogramPrometheus(bw, "owamp_reordering", tags, ts, rs.reorderingHist, 1.0)
-			if err != nil {
-				return err
-			}
+			// TODO: write reordering histogram
+			// err = WriteHistogramPrometheus(bw, "owamp_reordering", tags, ts, rs.reorderingHist, 1.0)
+			// if err != nil {
+			// 	return err
+			// }
 		}
 
 		// write latency summary values

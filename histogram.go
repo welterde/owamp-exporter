@@ -14,26 +14,43 @@ import (
 // which is licensed under MIT and authored by valyala, tenmozes, hagen1778
 
 // dump out histogram in prometheus style
-func WriteHistogramPrometheus(w *bufio.Writer, name string, tags string, timestamp uint64, histo []HistogramEntry, scale float64) error {
+func WriteHistogramPrometheus(w *bufio.Writer, name string, tags string, timestamp uint64, histo []HistogramEntry, scale float64, histBins []float64) error {
 	// create sorted copy of input histogram
-	hist := make([]HistogramEntry, len(histo))
-	_ = copy(hist, histo)
-	sort.Slice(hist, func(i int, j int) bool {
-		return hist[i].key < hist[j].key
+	chist := make([]HistogramEntry, len(histo))
+	_ = copy(chist, histo)
+	sort.Slice(chist, func(i int, j int) bool {
+		return chist[i].key < chist[j].key
 	})
 
-	// not useful to show empty histogram.. and code below is not ready for that either
-	if len(hist) < 1 {
-		return nil
+	// create output histogram matching the precomputed histogram bins
+	hist := make([]HistogramEntry, len(histBins))
+	for i := 0; i < len(histBins); i++ {
+		hist[i].key = uint64(histBins[i] / scale)
+		hist[i].value = 0
 	}
 
-	// now produce a cumulative histogram from the existing one
+	// rebin onto new histogram bins
 	var cumsum float64 = 0.0
-	for i, entry := range hist {
+	var j uint64 = 0
+	
+	for _, entry := range chist {
+		curBin := scale * float64(entry.key)
+
 		cumsum += float64(entry.value) * float64(entry.key) * scale
-		if (i + 1) < len(hist) {
-			hist[i+1].value += entry.value
+		
+		// advance pointer to new histogram until next increment 
+		for (j+1 < uint64(len(hist))) && (curBin > histBins[j]) {
+			hist[j+1].value = hist[j].value
+			j++
 		}
+
+		hist[j].value += entry.value
+	}
+
+	// fill up the remaining histogram
+	for j+1 < uint64(len(hist)) {
+		hist[j+1].value = hist[j].value
+		j++
 	}
 
 	for i, entry := range hist {
@@ -63,6 +80,29 @@ func WriteHistogramPrometheus(w *bufio.Writer, name string, tags string, timesta
 	}
 
 	return nil
+}
+
+// generate histogram bins to use for prometheus later
+func MakePromHistBins(histMinLatency uint64, histMaxLatency uint64, histMaxLinearLatency uint64, histLinearPtsPerMs uint64, histLogPts uint64) []float64 {
+	numLinPts := (histMaxLinearLatency-histMinLatency)*histLinearPtsPerMs
+	ret := make([]float64, numLinPts + histLogPts)
+
+	var i uint64
+	for i = 0; i < numLinPts; i++ {
+		ret[i] = float64(histMinLatency)/1000.0 + float64(i) / float64(histLinearPtsPerMs) / 1000.0
+	}
+
+	// calculate the log-spacing we need between
+	// 1.0 and log_maxLinLatency(maxLatency)
+	maxExponent := math.Log(float64(histMaxLatency))/math.Log(float64(histMaxLinearLatency))
+
+	stepSize := (maxExponent - 1.0) / float64(histLogPts)
+
+	var j uint64
+	for j = 0; uint64(j) < histLogPts; j++ {
+		ret[i+j] = math.Pow(float64(histMaxLinearLatency), 1.0+stepSize*float64(j)) / 1000.0
+	}
+	return ret
 }
 
 const (
