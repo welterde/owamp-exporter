@@ -25,8 +25,8 @@ DEFAULT-PPS 10
 # Anything below min_latency falls into the min_latency bin
 # Anything above max_latency falls into the +Inf bin
 DEFAULT-HIST min-latency 1 # ms
-DEFAULT-HIST max-linear_latency 50 # ms
-DEFAULT-HIST linear-points_per_ms 4
+DEFAULT-HIST max-linear-latency 50 # ms
+DEFAULT-HIST linear-points-per-ms 4
 DEFAULT-HIST max-latency 1000 # ms
 DEFAULT-HIST log-points 20
 

@@ -101,6 +101,34 @@ func ParseConfig(r *bufio.Reader) (Config, error) {
 				return ret, errors.New("Config syntax error: DEFAULT-PPS invalid int")
 			}
 
+		case "DEFAULT-HIST":
+			if len(parts) != 2 {
+				return ret, errors.New("Config syntax error: DEFAULT-HIST <option> <value>")
+			}
+			
+			switch strings.ToLower(parts[1]) {
+			case "min-latency":
+				if defaultHistMinLatency, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+					return ret, errors.New("Config syntax error: DEFAULT-HIST min-latency <integer>: invalid int")
+				}
+			case "max-linear-latency":
+				if defaultHistMaxLinearLatency, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+					return ret, errors.New("Config syntax error: DEFAULT-HIST max-linear-latency <integer>: invalid int")
+				}
+			case "max-latency":
+				if defaultHistMaxLatency, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+					return ret, errors.New("Config syntax error: DEFAULT-HIST max-latency <integer>: invalid int")
+				}
+			case "linear-points-per-ms":
+				if defaultHistLinearPtsPerMs, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+					return ret, errors.New("Config syntax error: DEFAULT-HIST linear-points-per-ms <integer>: invalid int")
+				}
+			case "log-points":
+				if defaultHistLogPts, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+					return ret, errors.New("Config syntax error: DEFAULT-HIST log-points <integer>: invalid int")
+				}
+			}
+
 		case "MEASUREMENT":
 			if len(parts) < 3 {
 				return ret, errors.New("Config syntax error: MEASUREMENT <targetSRC> <targetDST> [options]")
