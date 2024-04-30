@@ -32,6 +32,18 @@ nfpms:
     description: "One-way Active Measurement (OWAMP) Exporter"
     formats:
       - deb
+    bindir: /usr/bin
+    contents:
+      # Simple config file
+      - src: default_config.txt
+        dst: /etc/owamp_exporter.conf
+        type: config
+      - src: ./systemd/owamp_exporter.service
+        dst: /etc/systemd/system/owamp_exporter.service
+        type: config
+      - src: ./systemd/owamp_exporter
+        dst: /etc/default/owamp_exporter
+        type: config
       
 archives:
   - format: tar.gz

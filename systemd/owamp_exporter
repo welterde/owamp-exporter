@@ -1,0 +1,4 @@
+# Command line options for owamp_exporter.service
+# See also /etc/owamp_exporter.conf
+
+ARGS="-cfg-file /etc/owamp_exporter.conf -workdir /var/tmp"

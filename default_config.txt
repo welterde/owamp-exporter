@@ -1,0 +1,28 @@
+# define measurement targets
+# SYNTAX: TARGET <name> <hostname> [options]
+# Options:
+# - local
+#   The local host (do not specifiy testhost in powstream invocation)
+# - shortname=<shortname>
+#   Override the default shortname to be used in returned metrics
+#TARGET tgt1 destination_host local
+#TARGET tgt2 destination_host2
+#TARGET tgt3_6 2001:db8::1 shortname=tgt3
+#TARGET tgt3_4 192.0.2.1 shortname=tgt3
+
+
+# configure default options for measurements
+DEFAULT-PPS 10
+
+# define measurements between target1 and target2
+# target1 is sender
+# target2 is receiver
+# SYNTAX: MEASUREMENT <name1> <name2> [options in key=value syntax]
+# Options:
+# - pps=<packets per second>
+#   Number of packets to send per second
+# - bucketwidth=<histogram width in seconds>
+#   Size of each histogram bin in seconds
+#MEASUREMENT tgt1 tgt2
+#MEASUREMENT tgt2 tgt1 pps=5 bucketwidth=0.0001
+
