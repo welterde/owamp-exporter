@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Restart=always
 EnvironmentFile=/etc/default/owamp_exporter
-ExecStart=/usr/bin/owamp_exporter $ARGS
+ExecStart=/usr/bin/owamp-exporter $ARGS
 TimeoutStopSec=20s
 
 # Extra security hardening options
