@@ -102,29 +102,29 @@ func ParseConfig(r *bufio.Reader) (Config, error) {
 			}
 
 		case "DEFAULT-HIST":
-			if len(parts) != 2 {
+			if len(parts) != 3 {
 				return ret, errors.New("Config syntax error: DEFAULT-HIST <option> <value>")
 			}
 			
 			switch strings.ToLower(parts[1]) {
 			case "min-latency":
-				if defaultHistMinLatency, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+				if defaultHistMinLatency, err = strconv.ParseUint(parts[2], 10, 64); err != nil {
 					return ret, errors.New("Config syntax error: DEFAULT-HIST min-latency <integer>: invalid int")
 				}
 			case "max-linear-latency":
-				if defaultHistMaxLinearLatency, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+				if defaultHistMaxLinearLatency, err = strconv.ParseUint(parts[2], 10, 64); err != nil {
 					return ret, errors.New("Config syntax error: DEFAULT-HIST max-linear-latency <integer>: invalid int")
 				}
 			case "max-latency":
-				if defaultHistMaxLatency, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+				if defaultHistMaxLatency, err = strconv.ParseUint(parts[2], 10, 64); err != nil {
 					return ret, errors.New("Config syntax error: DEFAULT-HIST max-latency <integer>: invalid int")
 				}
 			case "linear-points-per-ms":
-				if defaultHistLinearPtsPerMs, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+				if defaultHistLinearPtsPerMs, err = strconv.ParseUint(parts[2], 10, 64); err != nil {
 					return ret, errors.New("Config syntax error: DEFAULT-HIST linear-points-per-ms <integer>: invalid int")
 				}
 			case "log-points":
-				if defaultHistLogPts, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+				if defaultHistLogPts, err = strconv.ParseUint(parts[2], 10, 64); err != nil {
 					return ret, errors.New("Config syntax error: DEFAULT-HIST log-points <integer>: invalid int")
 				}
 			}
@@ -170,6 +170,16 @@ func ParseConfig(r *bufio.Reader) (Config, error) {
 				}
 				if suffix, found := strings.CutPrefix(option, "bucketwidth="); found {
 					measurement.bucketWidth = suffix
+				}
+				if suffix, found := strings.CutPrefix(option, "hist-min-latency="); found {
+					if histMinLatency, err = strconv.ParseUint(suffix, 10, 64); err != nil {
+						return ret, errors.New("Config syntax error: MEASUREMENT hist-min-latency value not integer")
+					}
+				}
+				if suffix, found := strings.CutPrefix(option, "hist-max-linear-latency="); found {
+					if histMaxLinearLatency, err = strconv.ParseUint(suffix, 10, 64); err != nil {
+						return ret, errors.New("Config syntax error: MEASUREMENT hist-max-linear-latency value not integer")
+					}
 				}
 
 			}
